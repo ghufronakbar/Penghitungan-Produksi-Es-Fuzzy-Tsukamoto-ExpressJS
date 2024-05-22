@@ -1,2 +1,2 @@
-exports.account_controller = require('./account_controller')
-exports.calculate_controller = require('./calculate_controller')
+exports.accountController = require('./account_controller')
+exports.calculateController = require('./calculate_controller')

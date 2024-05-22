@@ -1,39 +1,39 @@
 "use strict";
 
-const verifikasiUser = require("../middleware/verifikasi-user");
+const userVerification = require("../middleware/user_verification");
+const userController = require("../controllers/user");
 
-module.exports = function (app) {
-  let userController = require("../controllers/user");
+module.exports = async (app) => {
 
   // ACCOUNT CONTROLLER
   app.route(`/api/user/register`)
-    .post(userController.account_controller.register);
+    .post(userController.accountController.register);
 
   app.route(`/api/user/login`)
-    .post(userController.account_controller.login);
+    .post(userController.accountController.login);
 
   app.route('/api/user/profile')
-    .get(verifikasiUser, userController.account_controller.profile);
+    .get(userVerification, userController.accountController.profile);
 
   app.route('/api/user/profile/edit')
-    .put(verifikasiUser, userController.account_controller.editProfile);
+    .put(userVerification, userController.accountController.editProfile);
 
   app.route('/api/user/profile/password')
-    .put(verifikasiUser, userController.account_controller.editPassword);
+    .put(userVerification, userController.accountController.editPassword);
 
 
   //CALCULATE CONTROLLER
   app.route(`/api/user/calculate`)
-    .post(verifikasiUser, userController.calculate_controller.calculate);
+    .post(userVerification, userController.calculateController.calculate);
 
   app.route(`/api/user/calculate/history`)
-    .get(verifikasiUser, userController.calculate_controller.historyCalculate);
+    .get(userVerification, userController.calculateController.historyCalculate);
 
   app.route(`/api/user/calculate/history/:id_calculate`)
-    .get(verifikasiUser, userController.calculate_controller.historyCalculateId);
+    .get(userVerification, userController.calculateController.historyCalculateId);
 
   app.route(`/api/user/calculate/history/delete/:id_calculate`)
-    .delete(verifikasiUser, userController.calculate_controller.historyDelete);
+    .delete(userVerification, userController.calculateController.historyDelete);
 
 };
 
