@@ -1,7 +1,9 @@
 'use strict';
 
-const connection = require('../../connection');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
+// CALCULATE WITH FUZZY TSUKAMOTO
 exports.calculate = async (req, res) => {
   const { persediaan, permintaan } = req.body;
   const id_user = req.decoded.id_user;
@@ -87,42 +89,12 @@ exports.calculate = async (req, res) => {
     produksibanyak = 1;
   }
 
-  // Insert into database
-  const query = `
-    INSERT INTO calculates (
-      id_user, persediaan, permintaan, produksi, 
-      derajat_keanggotaan_persediaan, derajat_keanggotaan_permintaan, derajat_keanggotaan_produksi, 
-      r1_derajat_persediaan, r1_derajat_permintaan, r1_alpha, r1_zi, r1_aixzi, 
-      r2_derajat_persediaan, r2_derajat_permintaan, r2_alpha, r2_zi, r2_aixzi, 
-      r3_derajat_persediaan, r3_derajat_permintaan, r3_alpha, r3_zi, r3_aixzi, 
-      r4_derajat_persediaan, r4_derajat_permintaan, r4_alpha, r4_zi, r4_aixzi, 
-      produksi_es_batu, datetime
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `;
-
-  const values = [
-    id_user, persediaan, permintaan, produksi,
-    persediaansedikit, permintaansedikit, produksisedikit,
-    persediaansedikit, permintaansedikit, a1, z1, a1 * z1,
-    persediaansedikit, permintaanbanyak, a2, z2, a2 * z2,
-    persediaanbanyak, permintaansedikit, a3, z3, a3 * z3,
-    persediaanbanyak, permintaanbanyak, a4, z4, a4 * z4,
-    produksi, nowDate
-  ];
-
-  connection.query(query, values, (error, results) => {
-    if (error) {
-      console.error(error);
-      return res.status(500).json({ status: 500, message: "Internal Server Error" });
-    }
-
-    return res.status(200).json({
-      status: 200,
-      message: "Calculation successful",
+  try {
+    const calculate = await prisma.calculates.create({
       data: {
         id_user,
-        persediaan: parseInt(persediaan),
-        permintaan: parseInt(permintaan),
+        persediaan,
+        permintaan,
         produksi,
         derajat_keanggotaan_persediaan: persediaansedikit,
         derajat_keanggotaan_permintaan: permintaansedikit,
@@ -148,55 +120,75 @@ exports.calculate = async (req, res) => {
         r4_zi: z4,
         r4_aixzi: a4 * z4,
         produksi_es_batu: produksi,
-        date_time: nowDate
+        datetime: nowDate
       }
     });
-  });
+
+    return res.status(200).json({
+      status: 200,
+      message: "Calculation successful",
+      data: calculate
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ status: 500, message: "Internal Server Error" });
+  }
 };
 
+// HISTORY CALCULATE BY USER ID
 exports.historyCalculate = async (req, res) => {
-  const id_user = req.decoded.id_user
-  const query = `SELECT * FROM calculates WHERE id_user=?`
-  connection.query(query, id_user,
-    (error, rows) => {
-      if (error) {
-        console.error(error);
-        return res.status(500).json({ status: 500, message: "Internal Server Error" });
-      } else {
-        return res.status(200).json({ status: 200, rows });
-      }
-    }
-  )
-}
+  const id_user = req.decoded.id_user;
 
+  try {
+    const calculates = await prisma.calculates.findMany({
+      where: { id_user }
+    });
+
+    return res.status(200).json({ status: 200, data: calculates });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ status: 500, message: "Internal Server Error" });
+  }
+};
+
+// DETAIL HISTORY CALCULATE
 exports.historyCalculateId = async (req, res) => {
-  const id_user = req.decoded.id_user
-  const id_calculate = req.params.id_calculate
-  const query = `SELECT * FROM calculates WHERE id_user=? AND id_calculate=?`
-  connection.query(query, [id_user, id_calculate],
-    (error, rows) => {
-      if (error) {
-        console.error(error);
-        return res.status(500).json({ status: 500, message: "Internal Server Error" });
-      } else {
-        return res.status(200).json({ status: 200, rows });
-      }
-    }
-  )
-}
+  const id_user = req.decoded.id_user;
+  const id_calculate = parseInt(req.params.id_calculate);
 
-exports.historyDelete = async (req, res) => {
-  const id_user = req.decoded.id_user
-  const id_calculate = req.params.id_calculate
-  const query = `DELETE FROM calculates WHERE id_user=? and id_calculate=?`
-  connection.query(query, [id_user, id_calculate],
-    (error, rows) => {
-      if (error) {
-        console.error(error);
-        return res.status(500).json({ status: 500, message: "Internal Server Error" });
-      } else {
-        return res.status(200).json({ status: 200, message: "Successfully delete history" });
-      }
+  try {
+    const calculate = await prisma.calculates.findFirst({
+      where: { id_user, id_calculate }
+    });
+
+    if (!calculate) {
+      return res.status(404).json({ status: 404, message: "Calculation not found" });
     }
-  )
-}
+
+    return res.status(200).json({ status: 200, data: calculate });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ status: 500, message: "Internal Server Error" });
+  }
+};
+
+// DELETE HISTORY CALCULATE
+exports.historyDelete = async (req, res) => {
+  const id_user = req.decoded.id_user;
+  const id_calculate = parseInt(req.params.id_calculate);
+
+  try {
+    const deleteResult = await prisma.calculates.deleteMany({
+      where: { id_user, id_calculate }
+    });
+
+    if (deleteResult.count === 0) {
+      return res.status(404).json({ status: 404, message: "Calculation not found" });
+    }
+
+    return res.status(200).json({ status: 200, message: "Successfully deleted history" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ status: 500, message: "Internal Server Error" });
+  }
+};
