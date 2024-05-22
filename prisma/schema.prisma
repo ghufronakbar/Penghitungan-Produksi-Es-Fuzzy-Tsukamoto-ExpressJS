@@ -1,0 +1,59 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Users {
+  id_user    Int          @id @default(autoincrement())
+  fullname   String
+  email      String       @unique
+  password   String
+  calculates Calculates[]
+}
+
+model Calculates {
+  id_calculate                   Int      @id @default(autoincrement())
+  id_user                        Int 
+  persediaan                     Int
+  permintaan                     Int
+  produksi                       Int
+  derajat_keanggotaan_persediaan Int
+  derajat_keanggotaan_permintaan Int
+  derajat_keanggotaan_produksi   Int
+  r1_derajat_persediaan          Int
+  r1_derajat_permintaan          Int
+  r1_alpha                       Int
+  r1_zi                          Int
+  r1_aixzi                       Int
+  r2_derajat_persediaan          Int
+  r2_derajat_permintaan          Int
+  r2_alpha                       Int
+  r2_zi                          Int
+  r2_aixzi                       Int
+  r3_derajat_persediaan          Int
+  r3_derajat_permintaan          Int
+  r3_alpha                       Int
+  r3_zi                          Int
+  r3_aixzi                       Int
+  r4_derajat_persediaan          Int
+  r4_derajat_permintaan          Int
+  r4_alpha                       Int
+  r4_zi                          Int
+  r4_aixzi                       Int
+  produksi_es_batu               Int
+  datetime                       DateTime @default(now())
+  user                           Users    @relation(fields: [id_user], references: [id_user])
+
+  @@index([id_user])
+}
+
+model Akses_Token {
+  id         Int    @id @default(autoincrement())
+  id_user    Int
+  ip_address String @db.VarChar(255)
+  token      String @db.Text
+}
