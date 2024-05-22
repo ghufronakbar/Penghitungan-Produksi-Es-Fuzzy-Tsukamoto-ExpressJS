@@ -15,5 +15,6 @@ var routesUser = require("../routes/user");
 routesUser(app);
 
 app.listen(process.env.PORT, () => {
-  console.log(`Server started on port ${process.env.PORT}`);  
+  console.log(`Server started on port ${process.env.PORT}`); 
+  console.log(process.env.BASE_URL) 
 });
