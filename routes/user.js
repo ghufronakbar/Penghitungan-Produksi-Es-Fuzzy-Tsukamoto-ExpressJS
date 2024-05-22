@@ -32,5 +32,8 @@ module.exports = function (app) {
   app.route(`/api/user/calculate/history/:id_calculate`)
     .get(verifikasiUser, userController.calculate_controller.historyCalculateId);
 
+  app.route(`/api/user/calculate/history/delete/:id_calculate`)
+    .delete(verifikasiUser, userController.calculate_controller.historyDelete);
+
 };
 

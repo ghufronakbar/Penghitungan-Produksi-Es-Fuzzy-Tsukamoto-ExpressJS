@@ -120,9 +120,9 @@ exports.calculate = async (req, res) => {
       status: 200,
       message: "Calculation successful",
       data: {
-        id_user, 
-        persediaan : parseInt(persediaan), 
-        permintaan: parseInt(permintaan), 
+        id_user,
+        persediaan: parseInt(persediaan),
+        permintaan: parseInt(permintaan),
         produksi,
         derajat_keanggotaan_persediaan: persediaansedikit,
         derajat_keanggotaan_permintaan: permintaansedikit,
@@ -154,32 +154,48 @@ exports.calculate = async (req, res) => {
   });
 };
 
-exports.historyCalculate = async (req,res)=>{
+exports.historyCalculate = async (req, res) => {
   const id_user = req.decoded.id_user
   const query = `SELECT * FROM calculates WHERE id_user=?`
-  connection.query(query,id_user,
-    (error, rows)=>{
-      if(error){
+  connection.query(query, id_user,
+    (error, rows) => {
+      if (error) {
         console.error(error);
         return res.status(500).json({ status: 500, message: "Internal Server Error" });
-      } else {        
+      } else {
         return res.status(200).json({ status: 200, rows });
       }
     }
   )
 }
 
-exports.historyCalculateId = async (req,res)=>{
+exports.historyCalculateId = async (req, res) => {
   const id_user = req.decoded.id_user
   const id_calculate = req.params.id_calculate
   const query = `SELECT * FROM calculates WHERE id_user=? AND id_calculate=?`
-  connection.query(query,[id_user,id_calculate],
-    (error, rows)=>{
-      if(error){
+  connection.query(query, [id_user, id_calculate],
+    (error, rows) => {
+      if (error) {
         console.error(error);
         return res.status(500).json({ status: 500, message: "Internal Server Error" });
-      } else {        
+      } else {
         return res.status(200).json({ status: 200, rows });
+      }
+    }
+  )
+}
+
+exports.historyDelete = async (req, res) => {
+  const id_user = req.decoded.id_user
+  const id_calculate = req.params.id_calculate
+  const query = `DELETE FROM calculates WHERE id_user=? and id_calculate=?`
+  connection.query(query, [id_user, id_calculate],
+    (error, rows) => {
+      if (error) {
+        console.error(error);
+        return res.status(500).json({ status: 500, message: "Internal Server Error" });
+      } else {
+        return res.status(200).json({ status: 200, message: "Successfully delete history" });
       }
     }
   )
