@@ -93,8 +93,8 @@ exports.calculate = async (req, res) => {
     const calculate = await prisma.calculates.create({
       data: {
         id_user,
-        persediaan,
-        permintaan,
+        persediaan: parseInt(persediaan),
+        permintaan: parseInt(permintaan),
         produksi,
         derajat_keanggotaan_persediaan: persediaansedikit,
         derajat_keanggotaan_permintaan: permintaansedikit,
@@ -127,7 +127,7 @@ exports.calculate = async (req, res) => {
     return res.status(200).json({
       status: 200,
       message: "Calculation successful",
-      data: calculate
+      results: calculate
     });
   } catch (error) {
     console.error(error);
@@ -141,10 +141,13 @@ exports.historyCalculate = async (req, res) => {
 
   try {
     const calculates = await prisma.calculates.findMany({
-      where: { id_user }
+      where: { id_user },
+      orderBy: {
+        datetime: 'desc',
+      },
     });
 
-    return res.status(200).json({ status: 200, data: calculates });
+    return res.status(200).json({ status: 200, results: calculates });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ status: 500, message: "Internal Server Error" });
@@ -165,7 +168,7 @@ exports.historyCalculateId = async (req, res) => {
       return res.status(404).json({ status: 404, message: "Calculation not found" });
     }
 
-    return res.status(200).json({ status: 200, data: calculate });
+    return res.status(200).json({ status: 200, results: calculate });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ status: 500, message: "Internal Server Error" });
