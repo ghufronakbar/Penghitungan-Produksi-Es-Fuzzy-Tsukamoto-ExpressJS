@@ -8,7 +8,7 @@
     "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "prisma generate",
-    "postinstall": "prisma generate && prisma migrate dev --name init"
+    "postinstall": "prisma generate"
   },
   "author": "",
   "license": "ISC",
