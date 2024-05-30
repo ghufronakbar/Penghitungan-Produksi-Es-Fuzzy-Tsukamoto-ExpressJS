@@ -11,7 +11,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 //routes
-var routesUser = require("../routes/user");
+var routesUser = require("./routes/user");
 routesUser(app);
 
 app.listen(process.env.PORT, () => {
